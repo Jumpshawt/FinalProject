@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.andrsoid.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/error_register_screen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="100dp"
+        android:textColor="@color/design_default_color_error"
+        />
+
+    <TextView
+        android:id="@+id/username_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toRightOf="@id/error_register_screen"
+        app:layout_constraintLeft_toLeftOf="@id/error_register_screen"
+        app:layout_constraintTop_toTopOf="@id/error_register_screen"
+        android:layout_marginTop="50dp"
+        android:text="Username"
+        />
+
+
+    <EditText
+        android:id="@+id/username_entry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        app:layout_constraintTop_toBottomOf="@id/username_text"
+        app:layout_constraintRight_toRightOf="@id/username_text"
+        app:layout_constraintLeft_toLeftOf="@id/username_text"
+        android:layout_marginTop="40dp"
+        android:hint="Username"
+        tools:layout_editor_absoluteX="92dp"
+        tools:layout_editor_absoluteY="183dp" />
+
+    <TextView
+        android:id="@+id/password_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toRightOf="@id/username_entry"
+        app:layout_constraintLeft_toLeftOf="@id/username_entry"
+        app:layout_constraintTop_toBottomOf="@id/username_entry"
+        android:layout_marginTop="60dp"
+        android:text="Password"
+        />
+
+    <EditText
+        android:id="@+id/password_entry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Password"
+        android:layout_marginTop="40dp"
+        android:inputType="textPassword"
+        app:layout_constraintTop_toBottomOf="@+id/password_text"
+        app:layout_constraintRight_toRightOf="@id/password_text"
+        app:layout_constraintLeft_toLeftOf="@id/password_text"
+        />
+    <Button
+        android:id="@+id/user_register_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Register"
+        app:layout_constraintTop_toBottomOf="@id/password_entry"
+        app:layout_constraintRight_toRightOf="@id/password_entry"
+        app:layout_constraintLeft_toLeftOf="@id/password_entry"
+        android:layout_marginTop="20dp"
+        />
+
+    <Button
+        android:id="@+id/user_login_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Login"
+    app:layout_constraintTop_toBottomOf="@id/user_register_button"
+    app:layout_constraintRight_toRightOf="@id/user_register_button"
+    app:layout_constraintLeft_toLeftOf="@id/user_register_button"
+    android:layout_marginTop="20dp"
+    />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
