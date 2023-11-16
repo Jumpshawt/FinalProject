@@ -12,14 +12,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.finalproject.R;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.DateFormatSymbols;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
-
+import java.util.HashMap;
 public class EventAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
 
     ArrayList<EventModal> arrayList;
@@ -121,6 +124,7 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
 
             }
     });
+
         holder.getJoin().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -141,6 +145,26 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
         });
     }
 
+    public void uploadEventModalToFirebase(EventModal eventModal) {
+        // Get a reference to the database
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("EventModals");
+
+        // Convert the EventModal object to a Map
+        Map<String, Object> eventModalMap = new HashMap<>();
+        eventModalMap.put("img", eventModal.img);
+        eventModalMap.put("id", eventModal.id);
+        eventModalMap.put("type", eventModal.type);
+        eventModalMap.put("name", eventModal.name);
+        eventModalMap.put("location", eventModal.location);
+        eventModalMap.put("org", eventModal.org);
+        eventModalMap.put("description", eventModal.description);
+        eventModalMap.put("date", eventModal.date.toString());
+        eventModalMap.put("time", eventModal.time.toString());
+        // Push the data to the database
+        myRef.push().setValue(eventModalMap);
+
+    }
     public static String timeTostring(LocalTime time) {
         boolean am = true;
         int hour = time.getHour();

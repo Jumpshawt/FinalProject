@@ -2,6 +2,7 @@ package com.example.finalproject.ui.home;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,24 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.finalproject.R;
 import com.example.finalproject.databinding.FragmentHomeBinding;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.MemoryCacheSettings;
+import com.google.firebase.firestore.PersistentCacheSettings;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Source;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -28,7 +47,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HomeFragment extends Fragment {
 
@@ -55,21 +76,194 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
+
         arrayList.add(new EventModal("Today",LocalDate.now()));
         arrayList.add(new EventModal("Tomorrow",LocalDate.now().plus(1, ChronoUnit.DAYS)));
         arrayList.add(new EventModal("Later This week",LocalDate.now().plus(2, ChronoUnit.DAYS)));
         LocalDate nextWeekStart = LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
         arrayList.add(new EventModal("Next Week", nextWeekStart));
+        loadEventModalsFromFirestore();
 
-        arrayList.add(new EventModal());
-        arrayList.add(new EventModal(R.drawable.ic_menu_camera,"name","org","location","description", ("14:24:00"), "2023/10/24"));
-        arrayList.add(new EventModal(R.drawable.ic_launcher_background,"name1","location","org","description", ("14:24:00"), "2023/10/2"));
-        arrayList.add(new EventModal(R.drawable.ic_menu_slideshow,"name1","location","org","description", ("14:24:00"), "2023/10/2"));
         super.onCreate(savedInstanceState);
-        downloadCsvAsEventModal(downloadURL);
 
     }
 
+
+
+    public void loadEventModalsFromFirestore() {
+        // Get a reference to the Firestore database
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Load from the cache first
+        db.collection("EventModals")
+                .get(Source.CACHE)
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            // Handle the data
+                            handleQueryResult(task);
+                        } else {
+                            Log.w("tag", "Error getting documents from cache.", task.getException());
+                        }
+
+                        // Then load from the server
+                        db.collection("EventModals")
+                                .get(Source.SERVER)
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            // Handle the data
+                                            handleQueryResult(task);
+                                        } else {
+                                            Log.w("TAG", "Error getting documents from server.", task.getException());
+                                        }
+                                    }
+                                });
+                    }
+                });
+    }
+    private void handleQueryResult(Task<QuerySnapshot> task) {
+        // Create a list to hold the EventModal objects
+        List<EventModal> eventModals = new ArrayList<>();
+
+        // Loop through the documents in the snapshot
+        for (QueryDocumentSnapshot document : task.getResult()) {
+            // Create a new EventModal object and load each value
+            // ...
+            EventModal eventModal = new EventModal();
+
+            // Load each value individually
+            eventModal.img = document.getLong("img").intValue();
+            eventModal.id = document.getLong("id").intValue();
+            eventModal.type = document.getLong("type").intValue();
+            eventModal.name = document.getString("name");
+            eventModal.location = document.getString("location");
+            eventModal.org = document.getString("org");
+            eventModal.description = document.getString("description");
+
+            // Parse the date as a LocalDate
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            eventModal.date = LocalDate.parse(document.getString("date"), formatter);
+
+            eventModal.time = LocalTime.parse(document.getString("time"));
+
+            // Add the EventModal object to the list
+            arrayList.add(eventModal);
+        }
+        //once the new items have been added, update the content.and sort them
+        adapter.notifyDataSetChanged();
+        sortAndCull();
+
+    }
+    public void saveEventModalToFirestore(EventModal eventModal) {
+        // Get a reference to the Firestore database
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Convert the EventModal object to a Map
+        Map<String, Object> eventModalMap = new HashMap<>();
+        eventModalMap.put("img", eventModal.img);
+        eventModalMap.put("id", eventModal.id);
+        eventModalMap.put("type", eventModal.type);
+        eventModalMap.put("name", eventModal.name);
+        eventModalMap.put("location", eventModal.location);
+        eventModalMap.put("org", eventModal.org);
+        eventModalMap.put("description", eventModal.description);
+        eventModalMap.put("date", eventModal.date.toString());
+        eventModalMap.put("time", eventModal.time.toString());
+
+
+
+        // Add the data to the database
+        db.collection("EventModals").add(eventModalMap)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("TAG", "DocumentSnapshot added with ID: " + documentReference.getId());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("TAG", "Error adding document", e);
+                    }
+                });
+    }
+
+
+
+        public void loadEventModalsFromFirebase() {
+        // Get a reference to the database
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("EventModals");
+
+        // Attach a listener to the reference
+    //TODO: Make it so that this also stores the string as a file,
+    // so the user doesn't always need an internet connection.
+    // At the start of that file also include a last updated timestamp so that the user doesn't need to download as much.
+
+            myRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    // Create a list to hold the EventModal objects
+                    
+
+                    // Loop through the children of the snapshot
+                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                        // Create a new EventModal object
+                        EventModal eventModal = new EventModal();
+
+                        // Load each value individually
+                        eventModal.img =(childSnapshot.child("img").getValue(Integer.class));
+                        eventModal.id = (childSnapshot.child("id").getValue(Integer.class));
+                        eventModal.type =(childSnapshot.child("type").getValue(Integer.class));
+                        eventModal.name = childSnapshot.child("name").getValue(String.class);
+                        eventModal.location = childSnapshot.child("location").getValue(String.class);
+                        eventModal.org = childSnapshot.child("org").getValue(String.class);
+                        eventModal.description = childSnapshot.child("description").getValue(String.class);
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                        eventModal.date = LocalDate.parse(childSnapshot.child("date").getValue(String.class), formatter);
+                        eventModal.time = LocalTime.parse(childSnapshot.child("time").getValue(String.class));
+                        arrayList.add(eventModal);
+                        adapter.notifyDataSetChanged();
+                        // Add the EventModal object to the list
+
+                    }
+                    sortAndCull();
+
+
+                    // Now you have a list of EventModal objects loaded from Firebase
+                    // Do something with the list here, like updating your RecyclerView
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    // Failed to read value
+                    Log.w("TAG", "Failed to read value.", error.toException());
+                }
+            });
+    }
+    public void uploadEventModalToFirebase(EventModal eventModal) {
+        // Get a reference to the database
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("EventModals");
+
+        // Convert the EventModal object to a Map
+        Map<String, Object> eventModalMap = new HashMap<>();
+        eventModalMap.put("img", eventModal.img);
+        eventModalMap.put("id", eventModal.id);
+        eventModalMap.put("type", eventModal.type);
+        eventModalMap.put("name", eventModal.name);
+        eventModalMap.put("location", eventModal.location);
+        eventModalMap.put("org", eventModal.org);
+        eventModalMap.put("description", eventModal.description);
+        eventModalMap.put("date", eventModal.date.toString());
+        eventModalMap.put("time", eventModal.time.toString());
+        // Push the data to the database
+        myRef.push().setValue(eventModalMap);
+
+    }
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         this.context =getContext();
@@ -98,7 +292,6 @@ public class HomeFragment extends Fragment {
 
     //TODO: Add a way of refreshing the page by scrolling to the top.
     //TODO: Reduce the amount of code
-    //TODO: Make it so that this also stores the string as a file, so the user doesn't always need an internet connection. At the start of that file also include a last updated timestamp so that the user doesn't need to download as much.
     public void downloadCsvAsEventModal(String urlString) {
         // Create a new thread to perform network operations
         new Thread(() -> {
@@ -145,7 +338,11 @@ public class HomeFragment extends Fragment {
                     }
                     sortAndCull();
                     adapter.notifyDataSetChanged();
-
+                    for (EventModal i :
+                    arrayList) {
+                    if (i.type == 0)
+                      saveEventModalToFirestore(i);
+                    }
 
                 });
             } catch (IOException e) {
@@ -156,7 +353,7 @@ public class HomeFragment extends Fragment {
     }
 
 
-                                                                                                                                                                                                                                        public String[][] parseCSV(String csvString) {
+    public String[][] parseCSV(String csvString) {
         List<String[]> data = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new StringReader(csvString))) {
             String line;
