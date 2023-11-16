@@ -2,6 +2,7 @@ package com.example.finalproject.ui.home;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -98,8 +99,7 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
                 holder.getImage().setImageResource(R.mipmap.hulk);
                 break;
         }
-        holder.getTime().setText(
-                getMonth(arrayList.get(position).date.getMonthValue()) + " "
+        holder.getTime().setText(getMonth(arrayList.get(position).date.getMonthValue()) + " "
                 + arrayList.get(position).date.getDayOfMonth() + " @"
                 + timeTostring(arrayList.get(position).time));
         holder.getName().setText(arrayList.get(position).name);
@@ -112,10 +112,8 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
                 int selectedPosition=holder.getAdapterPosition();
 
                 Intent intent=new Intent(view.getContext(), EventInfoScreen.class);
-                intent.putExtra("image",arrayList.get(selectedPosition).img);
-                intent.putExtra("name", arrayList.get(selectedPosition).name);
-                intent.putExtra("location",arrayList.get(selectedPosition).location);
-                intent.putExtra("description",arrayList.get(selectedPosition).description);
+
+                intent.putExtra("object", (Parcelable)arrayList.get(selectedPosition));
                 intent.putExtra("time", getMonth(arrayList.get(selectedPosition).date.getMonthValue()) + " "
                         + arrayList.get(selectedPosition).date.getDayOfMonth() + " @"
                         + timeTostring(arrayList.get(selectedPosition).time));
@@ -143,16 +141,16 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
         });
     }
 
-    private String timeTostring(LocalTime time) {
+    public static String timeTostring(LocalTime time) {
         boolean am = true;
         int hour = time.getHour();
         if (hour >12) {
             hour -= 12;
             am = false;
         }
-        return (hour+ ":" + time.getMinute()+ ((am)?" AM":" PM"));
+        return (hour+ ":" + String.format("%02d", time.getMinute()) + ((am)?" AM":" PM"));
     }
-    public String getMonth(int month) {
+    public static String getMonth(int month) {
         return new DateFormatSymbols().getMonths()[month-1];
     }
 

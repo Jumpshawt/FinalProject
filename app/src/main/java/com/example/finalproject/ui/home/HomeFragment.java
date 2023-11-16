@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
-import java.sql.Date;
-import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -57,16 +55,16 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
-        arrayList.add(new EventModal(1,"Today",LocalDate.now()));
-        arrayList.add(new EventModal(1,"Tomorrow",LocalDate.now().plus(1, ChronoUnit.DAYS)));
-        arrayList.add(new EventModal(1,"Later This week",LocalDate.now().plus(2, ChronoUnit.DAYS)));
+        arrayList.add(new EventModal("Today",LocalDate.now()));
+        arrayList.add(new EventModal("Tomorrow",LocalDate.now().plus(1, ChronoUnit.DAYS)));
+        arrayList.add(new EventModal("Later This week",LocalDate.now().plus(2, ChronoUnit.DAYS)));
         LocalDate nextWeekStart = LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
-        arrayList.add(new EventModal(1,"Next Week", nextWeekStart));
+        arrayList.add(new EventModal("Next Week", nextWeekStart));
 
         arrayList.add(new EventModal());
-        arrayList.add(new EventModal(0,R.drawable.ic_menu_camera,"name","org","location","description", ("14:24:00"), "2023/10/24"));
-        arrayList.add(new EventModal(0,R.drawable.ic_launcher_background,"name1","location","org","description", ("14:24:00"), "2023/10/2"));
-        arrayList.add(new EventModal(0,R.drawable.ic_menu_slideshow,"name1","location","org","description", ("14:24:00"), "2023/10/2"));
+        arrayList.add(new EventModal(R.drawable.ic_menu_camera,"name","org","location","description", ("14:24:00"), "2023/10/24"));
+        arrayList.add(new EventModal(R.drawable.ic_launcher_background,"name1","location","org","description", ("14:24:00"), "2023/10/2"));
+        arrayList.add(new EventModal(R.drawable.ic_menu_slideshow,"name1","location","org","description", ("14:24:00"), "2023/10/2"));
         super.onCreate(savedInstanceState);
         downloadCsvAsEventModal(downloadURL);
 

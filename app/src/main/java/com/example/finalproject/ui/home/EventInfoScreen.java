@@ -9,11 +9,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.finalproject.R;
 
-import java.util.PriorityQueue;
 
 public class EventInfoScreen extends AppCompatActivity {
     ImageView eventImage;
     TextView name,location,description, time;
+    EventModal eventInfo;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,11 +28,13 @@ public class EventInfoScreen extends AppCompatActivity {
         description=findViewById(R.id.full_description);
 
         time = findViewById(R.id.full_time);
-
+        eventInfo = getIntent().getParcelableExtra("object");
+        
         eventImage.setImageResource(getIntent().getIntExtra("image",0));
-        name.setText(getIntent().getStringExtra("name"));
-        location.setText(getIntent().getStringExtra("location"));
+        name.setText(eventInfo.name);
+        location.setText(eventInfo.location);
+        //#todo fix the
         time.setText(getIntent().getStringExtra("time"));
-        description.setText(getIntent().getStringExtra("description"));
+        description.setText(eventInfo.description);
     }
 }

@@ -2,15 +2,14 @@ package com.example.finalproject.ui.home;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import java.sql.Date;
+import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+
 
 
 public class EventModal implements Parcelable {
@@ -32,20 +31,9 @@ public class EventModal implements Parcelable {
         this.location = "";
         this.description = "";
     }
-    public EventModal(int type, String name)
-    {
-        this.type = type;
-        this.img = 0;
-        this.time = LocalTime.parse("10:15:45");
-        this.date = LocalDate.of(2003,4,5);
-        this.name = name;
-        this.org = "";
-        this.location = "";
-        this.description = "";
-    }
 
-    public EventModal(int type, int img, String name, String org, String location, String description, String time, String date) {
-        String dateString = "2023/10/02";
+
+    public EventModal(int img, String name, String org, String location, String description, String time, String date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/d");
         this.type = 0;
         this.img = img;
@@ -57,8 +45,8 @@ public class EventModal implements Parcelable {
         this.description = description;
     }
 
-    public EventModal(int type, String name, LocalDate date) {
-        this.type = type;
+    public EventModal(String name, LocalDate date) {
+        this.type = 1;
         this.name = name;
         this.date = date;
         this.img = 0;
@@ -97,9 +85,6 @@ public class EventModal implements Parcelable {
     public <T> LocalTime getTime() {
         return time;
     }
-    public int getDateOfYear() {
-        return date.getDayOfYear();
-    }
 
     public int getType() {
         return type;
@@ -119,5 +104,19 @@ public class EventModal implements Parcelable {
         dest.writeString(location);
         dest.writeString(org);
         dest.writeString(description);
+    }
+
+    private Object getMonth(int monthValue) {
+        return new DateFormatSymbols().getMonths()[monthValue-1];
+    }
+
+    public static String timeTostring(LocalTime time) {
+        boolean am = true;
+        int hour = time.getHour();
+        if (hour >12) {
+            hour -= 12;
+            am = false;
+        }
+        return (hour+ ":" + time.getMinute()+ ((am)?" AM":" PM"));
     }
 }
