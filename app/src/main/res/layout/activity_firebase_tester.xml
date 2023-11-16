@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FirebaseTester">
+
+
+
+    <EditText
+        android:id="@+id/firebase_path"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text=" "
+        />
+    <EditText
+        android:id="@+id/firebase_path_contents"
+        app:layout_constraintLeft_toLeftOf="@id/firebase_path"
+        app:layout_constraintRight_toRightOf="@id/firebase_path"
+        app:layout_constraintTop_toBottomOf="@id/firebase_path"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="content"
+        />
+
+
+
+    <Button
+        android:id="@+id/add"
+        app:layout_constraintTop_toBottomOf="@id/firebase_path_contents"
+        app:layout_constraintLeft_toLeftOf="@id/firebase_path_contents"
+        app:layout_constraintRight_toRightOf="@id/firebase_path_contents"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="add" />
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:scrollbars="vertical"
+        android:text="this is sometext\n bruh"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/add"  android:layout_height="400dp"/>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
