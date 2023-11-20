@@ -10,20 +10,26 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-
+/*
+EventModal.java
+Geordie Stenner T00702740
+---------------
+An class that holds information about the event.
+ */
 
 public class EventModal implements Parcelable {
-        int img, id, type;
-    String name, location, org, description;
+    public static final int EVENT = 0;
+    public static final int DATE = 1;
+    int img, id, type;
+    String name, location, org, description, fireId;
     LocalDate date;
     LocalTime time;
 
-
+    //default constructor
     public EventModal()
     {
-        this.type = 0;
+        this.type = EVENT;
         this.img = 0;
-
         this.time = LocalTime.parse("10:15:45");
         this.date = LocalDate.of(2003,4,5);
         this.name = "name";
@@ -32,10 +38,10 @@ public class EventModal implements Parcelable {
         this.description = "";
     }
 
-
+    //Constructor for event
     public EventModal(int img, String name, String org, String location, String description, String time, String date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/d");
-        this.type = 0;
+        this.type = EVENT;
         this.img = img;
         this.time = LocalTime.parse(time);
         this.name = name;
@@ -45,8 +51,9 @@ public class EventModal implements Parcelable {
         this.description = description;
     }
 
+    //Constructor for creating dates
     public EventModal(String name, LocalDate date) {
-        this.type = 1;
+        this.type = DATE;
         this.name = name;
         this.date = date;
         this.img = 0;
@@ -78,13 +85,6 @@ public class EventModal implements Parcelable {
             return new EventModal[size];
         }
     };
-
-    public <T> LocalDate getDate() {
-        return date;
-    }
-    public <T> LocalTime getTime() {
-        return time;
-    }
 
     public int getType() {
         return type;
@@ -118,5 +118,81 @@ public class EventModal implements Parcelable {
             am = false;
         }
         return (hour+ ":" + time.getMinute()+ ((am)?" AM":" PM"));
+    }
+
+    public int getImg() {
+        return img;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public String getOrg() {
+        return org;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public LocalTime getTime() {
+        return time;
+    }
+
+    public void setImg(int img) {
+        this.img = img;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setOrg(String org) {
+        this.org = org;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public void setTime(LocalTime time) {
+        this.time = time;
+    }
+
+    public String getFireId() {
+        return fireId;
+    }
+
+    public void setFireId(String fireId) {
+        this.fireId = fireId;
     }
 }
