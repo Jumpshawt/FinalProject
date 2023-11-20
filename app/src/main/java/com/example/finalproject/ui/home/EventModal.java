@@ -36,6 +36,7 @@ public class EventModal implements Parcelable {
         this.org = "";
         this.location = "";
         this.description = "";
+        this.fireId = "not working";
     }
 
     //Constructor for event
@@ -61,9 +62,9 @@ public class EventModal implements Parcelable {
         this.org = "";
         this.location = "";
         this.description = "";
+        this.fireId = "not working";
+
     }
-
-
     protected EventModal(Parcel in) {
         img = in.readInt();
         id = in.readInt();
@@ -72,6 +73,10 @@ public class EventModal implements Parcelable {
         location = in.readString();
         org = in.readString();
         description = in.readString();
+        fireId = in.readString();
+        time = (LocalTime) in.readValue(getClass().getClassLoader());
+        date = (LocalDate) in.readValue(getClass().getClassLoader());
+
     }
 
     public static final Creator<EventModal> CREATOR = new Creator<EventModal>() {
@@ -104,6 +109,10 @@ public class EventModal implements Parcelable {
         dest.writeString(location);
         dest.writeString(org);
         dest.writeString(description);
+        dest.writeString(fireId);
+        dest.writeValue(getTime());
+        dest.writeValue(getDate());
+
     }
 
     private Object getMonth(int monthValue) {
