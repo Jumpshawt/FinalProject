@@ -6,13 +6,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.finalproject.R;
 import com.example.finalproject.databinding.FragmentHomeBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
+import com.example.finalproject.ui.GeordieFirebaseMethods;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -21,19 +23,22 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.firestore.MemoryCacheSettings;
-import com.google.firebase.firestore.PersistentCacheSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.Source;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -41,10 +46,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-//Networking stuff
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -63,7 +64,7 @@ public class HomeFragment extends Fragment {
     private static final int ORG_INDEX = 5;
     private static final int LOCATION_INDEX = 6;
     private static final int DESCRIPTION_INDEX = 7;
-
+    private static final String TAG = "HomeFragment";
 
     private FragmentHomeBinding binding;
     private RecyclerView recyclerView;
@@ -77,191 +78,14 @@ public class HomeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
 
-        arrayList.add(new EventModal("Today",LocalDate.now()));
-        arrayList.add(new EventModal("Tomorrow",LocalDate.now().plus(1, ChronoUnit.DAYS)));
-        arrayList.add(new EventModal("Later This week",LocalDate.now().plus(2, ChronoUnit.DAYS)));
+        arrayList.add(new EventModal("Today", LocalDate.now()));
+        arrayList.add(new EventModal("Tomorrow", LocalDate.now().plus(1, ChronoUnit.DAYS)));
+        arrayList.add(new EventModal("Later This week", LocalDate.now().plus(2, ChronoUnit.DAYS)));
         LocalDate nextWeekStart = LocalDate.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
         arrayList.add(new EventModal("Next Week", nextWeekStart));
         loadEventModalsFromFirestore();
 
         super.onCreate(savedInstanceState);
-
-    }
-
-
-
-    public void loadEventModalsFromFirestore() {
-        // Get a reference to the Firestore database
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        // Load from the cache first
-        db.collection("EventModals")
-                .get(Source.CACHE)
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            // Handle the data
-                            handleQueryResult(task);
-                        } else {
-                            Log.w("tag", "Error getting documents from cache.", task.getException());
-                        }
-
-                        // Then load from the server
-                        db.collection("EventModals")
-                                .get(Source.SERVER)
-                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                        if (task.isSuccessful()) {
-                                            // Handle the data
-                                            handleQueryResult(task);
-                                        } else {
-                                            Log.w("TAG", "Error getting documents from server.", task.getException());
-                                        }
-                                    }
-                                });
-                    }
-                });
-    }
-    private void handleQueryResult(Task<QuerySnapshot> task) {
-        // Create a list to hold the EventModal objects
-        List<EventModal> eventModals = new ArrayList<>();
-
-        // Loop through the documents in the snapshot
-        for (QueryDocumentSnapshot document : task.getResult()) {
-            // Create a new EventModal object and load each value
-            // ...
-            EventModal eventModal = new EventModal();
-
-            // Load each value individually
-            eventModal.img = document.getLong("img").intValue();
-            eventModal.id = document.getLong("id").intValue();
-            eventModal.type = document.getLong("type").intValue();
-            eventModal.name = document.getString("name");
-            eventModal.location = document.getString("location");
-            eventModal.org = document.getString("org");
-            eventModal.description = document.getString("description");
-
-            // Parse the date as a LocalDate
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            eventModal.date = LocalDate.parse(document.getString("date"), formatter);
-
-            eventModal.time = LocalTime.parse(document.getString("time"));
-
-            // Add the EventModal object to the list
-            arrayList.add(eventModal);
-        }
-        //once the new items have been added, update the content.and sort them
-        adapter.notifyDataSetChanged();
-        sortAndCull();
-
-    }
-    public void saveEventModalToFirestore(EventModal eventModal) {
-        // Get a reference to the Firestore database
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        // Convert the EventModal object to a Map
-        Map<String, Object> eventModalMap = new HashMap<>();
-        eventModalMap.put("img", eventModal.img);
-        eventModalMap.put("id", eventModal.id);
-        eventModalMap.put("type", eventModal.type);
-        eventModalMap.put("name", eventModal.name);
-        eventModalMap.put("location", eventModal.location);
-        eventModalMap.put("org", eventModal.org);
-        eventModalMap.put("description", eventModal.description);
-        eventModalMap.put("date", eventModal.date.toString());
-        eventModalMap.put("time", eventModal.time.toString());
-
-
-
-        // Add the data to the database
-        db.collection("EventModals").add(eventModalMap)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d("TAG", "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("TAG", "Error adding document", e);
-                    }
-                });
-    }
-
-
-
-        public void loadEventModalsFromFirebase() {
-        // Get a reference to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("EventModals");
-
-        // Attach a listener to the reference
-    //TODO: Make it so that this also stores the string as a file,
-    // so the user doesn't always need an internet connection.
-    // At the start of that file also include a last updated timestamp so that the user doesn't need to download as much.
-
-            myRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    // Create a list to hold the EventModal objects
-                    
-
-                    // Loop through the children of the snapshot
-                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                        // Create a new EventModal object
-                        EventModal eventModal = new EventModal();
-
-                        // Load each value individually
-                        eventModal.img =(childSnapshot.child("img").getValue(Integer.class));
-                        eventModal.id = (childSnapshot.child("id").getValue(Integer.class));
-                        eventModal.type =(childSnapshot.child("type").getValue(Integer.class));
-                        eventModal.name = childSnapshot.child("name").getValue(String.class);
-                        eventModal.location = childSnapshot.child("location").getValue(String.class);
-                        eventModal.org = childSnapshot.child("org").getValue(String.class);
-                        eventModal.description = childSnapshot.child("description").getValue(String.class);
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                        eventModal.date = LocalDate.parse(childSnapshot.child("date").getValue(String.class), formatter);
-                        eventModal.time = LocalTime.parse(childSnapshot.child("time").getValue(String.class));
-                        arrayList.add(eventModal);
-                        adapter.notifyDataSetChanged();
-                        // Add the EventModal object to the list
-
-                    }
-                    sortAndCull();
-
-
-                    // Now you have a list of EventModal objects loaded from Firebase
-                    // Do something with the list here, like updating your RecyclerView
-                }
-
-                @Override
-                public void onCancelled(DatabaseError error) {
-                    // Failed to read value
-                    Log.w("TAG", "Failed to read value.", error.toException());
-                }
-            });
-    }
-    public void uploadEventModalToFirebase(EventModal eventModal) {
-        // Get a reference to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("EventModals");
-
-        // Convert the EventModal object to a Map
-        Map<String, Object> eventModalMap = new HashMap<>();
-        eventModalMap.put("img", eventModal.img);
-        eventModalMap.put("id", eventModal.id);
-        eventModalMap.put("type", eventModal.type);
-        eventModalMap.put("name", eventModal.name);
-        eventModalMap.put("location", eventModal.location);
-        eventModalMap.put("org", eventModal.org);
-        eventModalMap.put("description", eventModal.description);
-        eventModalMap.put("date", eventModal.date.toString());
-        eventModalMap.put("time", eventModal.time.toString());
-        // Push the data to the database
-        myRef.push().setValue(eventModalMap);
 
     }
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -277,11 +101,57 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(new CustomLayoutManager(recyclerView.getContext()));
         adapter = new EventAdapter(getContext(),arrayList,recyclerView);
         recyclerView.setAdapter(adapter);
-
         return view;
-
     }
 
+    public void loadEventModalsFromFirestore() {
+
+        // Get a reference to the Firestore database
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Enable offline persistence
+        db.setFirestoreSettings(new FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            .build());
+
+        db.collection("EventModals")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot snapshots, @Nullable FirebaseFirestoreException e) {
+                        for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    Log.d(TAG, "New Event: " + dc.getDocument().getData());
+                                    arrayList.add(GeordieFirebaseMethods.queryDocToEventModal(dc.getDocument()));
+                                    adapter.notifyItemInserted(arrayList.size());
+                                    break;
+                                case MODIFIED:
+                                    //figure out which
+                                    for (int i = 0, arrayListSize = arrayList.size(); i < arrayListSize; i++) {
+                                        EventModal modal = arrayList.get(i);
+                                        if (modal.fireId == dc.getDocument().getId()) {
+                                            modal = GeordieFirebaseMethods.queryDocToEventModal(dc.getDocument());
+                                            adapter.notifyItemChanged(i);
+                                            break;
+                                        }
+                                    }
+                                    Log.d(TAG, "Modified Event: " + dc.getDocument().getData());
+                                    break;
+                                case REMOVED:
+                                    for (EventModal modal : arrayList) {
+                                        if (modal.fireId == dc.getDocument().getId())
+                                            arrayList.remove(modal);
+                                    }
+                                    adapter.notifyDataSetChanged();
+                                    Log.d(TAG, "Removed Event: " + dc.getDocument().getData());
+                                    break;
+                            }
+                        }
+                        sortAndCull();
+                        adapter.notifyDataSetChanged();
+                    }
+                });
+    }
 
 
     @Override
@@ -339,9 +209,9 @@ public class HomeFragment extends Fragment {
                     sortAndCull();
                     adapter.notifyDataSetChanged();
                     for (EventModal i :
-                    arrayList) {
-                    if (i.type == 0)
-                      saveEventModalToFirestore(i);
+                            arrayList) {
+                        if (i.type == 0)
+                            GeordieFirebaseMethods.saveEventModalToFirestore(i);
                     }
 
                 });
@@ -376,20 +246,16 @@ public class HomeFragment extends Fragment {
         return array;
     }
     public void sortAndCull()
-    {        Collections.sort(arrayList, new Comparator<EventModal>() {
-        @Override
-        public int compare(EventModal em1, EventModal em2) {
-            int dateComparison = em1.getDate().compareTo(em2.getDate());
-            if (dateComparison == 0) {
-                // Dates are equal, compare times
-                return em1.getTime().compareTo(em2.getTime());
-            } else {
-                return dateComparison;
-            }
+    {Collections.sort(arrayList, (em1, em2) -> {
+        int dateComparison = em1.getDate().compareTo(em2.getDate());
+        if (dateComparison == 0) {
+            // Dates are equal, compare times
+            return em1.getTime().compareTo(em2.getTime());
+        } else {
+            return dateComparison;
         }
-
     });
-    arrayList.removeIf(eventModal -> eventModal.getDate().isBefore(LocalDate.now()));
+        arrayList.removeIf(eventModal -> eventModal.getDate().isBefore(LocalDate.now()));
         for (int i = 1; i < arrayList.size() - 1; i++) {
             if (arrayList.get(i).getType() == 1 && arrayList.get(i - 1).getType() == 1) {
                 arrayList.remove(i-1);
@@ -414,5 +280,8 @@ public class HomeFragment extends Fragment {
         return_modal.location = input[LOCATION_INDEX];
         return_modal.description = input[DESCRIPTION_INDEX];
         return return_modal;
-        }
     }
+
+}
+
+
