@@ -121,26 +121,29 @@ public class HomeFragment extends Fragment {
                         for (DocumentChange dc : snapshots.getDocumentChanges()) {
                             switch (dc.getType()) {
                                 case ADDED:
-                                    Log.d(TAG, "New Event: " + dc.getDocument().getData());
-                                    arrayList.add(GeordieFirebaseMethods.queryDocToEventModal(dc.getDocument()));
+                                    EventModal modalAdded = GeordieFirebaseMethods.queryDocToEventModal(dc.getDocument());
+                                    modalAdded.setFireId(dc.getDocument().getId());
+                                    Log.d(TAG, "New Event: " + dc.getDocument().getData() + "\n id is" + GeordieFirebaseMethods.queryDocToEventModal(dc.getDocument()).getFireId());
+                                    
+                                    arrayList.add(modalAdded);
                                     adapter.notifyItemInserted(arrayList.size());
                                     break;
                                 case MODIFIED:
                                     //figure out which
                                     for (int i = 0, arrayListSize = arrayList.size(); i < arrayListSize; i++) {
-                                        EventModal modal = arrayList.get(i);
-                                        if (modal.fireId == dc.getDocument().getId()) {
-                                            modal = GeordieFirebaseMethods.queryDocToEventModal(dc.getDocument());
+                                        EventModal modalModified = arrayList.get(i);
+                                        if (modalModified.getFireId() == dc.getDocument().getId()) {
+                                            modalModified = GeordieFirebaseMethods.queryDocToEventModal(dc.getDocument());
                                             adapter.notifyItemChanged(i);
                                             break;
                                         }
                                     }
                                     Log.d(TAG, "Modified Event: " + dc.getDocument().getData());
                                     break;
-                                case REMOVED:
-                                    for (EventModal modal : arrayList) {
-                                        if (modal.fireId == dc.getDocument().getId())
-                                            arrayList.remove(modal);
+                                     case REMOVED:
+                                    for (EventModal modalDeleted : arrayList) {
+                                        if (modalDeleted.fireId == dc.getDocument().getId())
+                                            arrayList.remove(modalDeleted);
                                     }
                                     adapter.notifyDataSetChanged();
                                     Log.d(TAG, "Removed Event: " + dc.getDocument().getData());
