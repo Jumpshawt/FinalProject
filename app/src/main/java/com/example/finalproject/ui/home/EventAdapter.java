@@ -16,7 +16,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.DateFormatSymbols;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
@@ -102,24 +101,23 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
                 holder.getImage().setImageResource(R.mipmap.hulk);
                 break;
         }
-        holder.getTime().setText(getMonth(arrayList.get(position).date.getMonthValue()) + " "
-                + arrayList.get(position).date.getDayOfMonth() + " @"
-                + timeTostring(arrayList.get(position).time));
-        holder.getName().setText(arrayList.get(position).name);
-        holder.getOrg().setText(arrayList.get(position).org);
-        holder.getLocation().setText(arrayList.get(position).location);
+        final EventModal i = arrayList.get(position);
+        holder.getTime().setText(GeordieMethods.modalTime(i));
+        holder.getName().setText(i.name);
+        holder.getOrg().setText(i.org);
+        holder.getLocation().setText(i.location);
 
         holder.getHolder().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int selectedPosition=holder.getAdapterPosition();
-
+                Toast.makeText(context, "loading a new event into info: id:"+ arrayList.get(selectedPosition).getFireId(), Toast.LENGTH_SHORT).show();
                 Intent intent=new Intent(view.getContext(), EventInfoScreen.class);
 
                 intent.putExtra("object", (Parcelable)arrayList.get(selectedPosition));
                 intent.putExtra("time", getMonth(arrayList.get(selectedPosition).date.getMonthValue()) + " "
                         + arrayList.get(selectedPosition).date.getDayOfMonth() + " @"
-                        + timeTostring(arrayList.get(selectedPosition).time));
+                        + GeordieMethods.timeTostring(arrayList.get(selectedPosition).time));
                 context.startActivity(intent);
 
             }
@@ -141,6 +139,7 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
             @Override
             public void onClick(View v) {
                 Toast.makeText(context, "liked", Toast.LENGTH_SHORT).show();
+
             }
         });
     }
@@ -161,19 +160,12 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
         eventModalMap.put("description", eventModal.description);
         eventModalMap.put("date", eventModal.date.toString());
         eventModalMap.put("time", eventModal.time.toString());
+
         // Push the data to the database
         myRef.push().setValue(eventModalMap);
 
     }
-    public static String timeTostring(LocalTime time) {
-        boolean am = true;
-        int hour = time.getHour();
-        if (hour >12) {
-            hour -= 12;
-            am = false;
-        }
-        return (hour+ ":" + String.format("%02d", time.getMinute()) + ((am)?" AM":" PM"));
-    }
+
     public static String getMonth(int month) {
         return new DateFormatSymbols().getMonths()[month-1];
     }
