@@ -9,12 +9,11 @@
         android:id="@+id/error_register_screen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="50dp"
         android:textColor="@color/design_default_color_error"
-        />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/username_text"
@@ -46,25 +45,23 @@
         android:id="@+id/password_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintRight_toRightOf="@id/username_entry"
-        app:layout_constraintLeft_toLeftOf="@id/username_entry"
-        app:layout_constraintTop_toBottomOf="@id/username_entry"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="30dp"
         android:text="Password"
-        />
+        app:layout_constraintLeft_toLeftOf="@id/username_entry"
+        app:layout_constraintRight_toRightOf="@id/username_entry"
+        app:layout_constraintTop_toBottomOf="@id/username_entry" />
 
     <EditText
         android:id="@+id/password_entry"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:ems="10"
         android:hint="Password"
-        android:layout_marginTop="40dp"
         android:inputType="textPassword"
-        app:layout_constraintTop_toBottomOf="@+id/password_text"
-        app:layout_constraintRight_toRightOf="@id/password_text"
         app:layout_constraintLeft_toLeftOf="@id/password_text"
-        />
+        app:layout_constraintRight_toRightOf="@id/password_text"
+        app:layout_constraintTop_toBottomOf="@+id/password_text" />
     <Button
         android:id="@+id/user_register_button"
         android:layout_width="wrap_content"

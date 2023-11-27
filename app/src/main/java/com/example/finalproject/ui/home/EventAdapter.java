@@ -91,30 +91,28 @@ public class EventAdapter extends RecyclerView.Adapter<RecyclerViewHolder> {
         //assign a random image
         switch (rand.nextInt(5)) {
             case 0:
-                arrayList.get(position).img = (R.mipmap.weird);
-                holder.getImage().setImageResource(R.mipmap.weird);
+                arrayList.get(position).img = (R.mipmap.event1);
+                holder.getImage().setImageResource(R.mipmap.event1);
                 break;
             case 1:
-                arrayList.get(position).img = (R.mipmap.yelling);
-                holder.getImage().setImageResource(R.mipmap.yelling);
+                arrayList.get(position).img = (R.mipmap.event1);
+                holder.getImage().setImageResource(R.mipmap.event1);
                 break;
             case 2:
-                arrayList.get(position).img = (R.mipmap.thinking);
-                holder.getImage().setImageResource(R.mipmap.thinking);
+                arrayList.get(position).img = (R.mipmap.event1);
+                holder.getImage().setImageResource(R.mipmap.event1);
                 break;
-
             case 3:
-                arrayList.get(position).img = (R.mipmap.hulk);
-                holder.getImage().setImageResource(R.mipmap.weird);
+                arrayList.get(position).img = (R.mipmap.event1);
+                holder.getImage().setImageResource(R.mipmap.event1);
                 break;
-
             case 4:
-                holder.getImage().setImageResource(R.mipmap.hulk);
-
+                arrayList.get(position).img = (R.mipmap.event1);
+                holder.getImage().setImageResource(R.mipmap.event1);
                 break;
-
             default:
-                holder.getImage().setImageResource(R.mipmap.hulk);
+                arrayList.get(position).img = (R.mipmap.event1);
+                holder.getImage().setImageResource(R.mipmap.event1);
                 break;
         }
         final EventModal i = arrayList.get(position);
