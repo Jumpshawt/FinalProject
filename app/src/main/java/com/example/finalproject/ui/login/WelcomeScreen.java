@@ -9,14 +9,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.example.finalproject.MainActivity;
 import com.example.finalproject.R;
 
-public class WelcomeScreen extends AppCompatActivity {
+public class WelcomeScreen extends AppCompatActivity{
 
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -45,8 +46,25 @@ public class WelcomeScreen extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Intent i = new Intent(WelcomeScreen.this, MainActivity.class);
-                startActivity(i);
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(5000);
+                            Toast.makeText(getBaseContext(), "nap time is over", Toast.LENGTH_SHORT).show();
+                            Thread.sleep(5000);
+
+                            Intent i = new Intent(WelcomeScreen.this, MainActivity.class);
+                            startActivity(i);
+                        }
+                        catch (InterruptedException e)
+                        {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                };
+
+
             }
         });
 

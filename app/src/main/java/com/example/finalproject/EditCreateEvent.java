@@ -16,8 +16,6 @@ import android.widget.Toast;
 
 import com.example.finalproject.ui.GeordieFirebaseMethods;
 import com.example.finalproject.ui.home.EventModal;
-import com.example.finalproject.ui.home.GeordieMethods;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -27,7 +25,7 @@ import java.time.LocalTime;
 
 
 
-public class FirebaseTester extends AppCompatActivity {
+public class EditCreateEvent extends AppCompatActivity {
     public static final String TAG = "FirebaseTester";
     Button create_event, date_button;
     TextView output;
@@ -36,8 +34,6 @@ public class FirebaseTester extends AppCompatActivity {
     EventModal modal;
     LocalDate date;
     private boolean editing;
-
-    private FirebaseAnalytics mFirebaseAnalytics;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -88,20 +84,14 @@ public class FirebaseTester extends AppCompatActivity {
                 else
                 {
                     EventModal e = new EventModal();
-                    e.setName(name.getText().toString());
-                    e.setTime(time);
-                    e.setDate(date);
-                    e.setDescription(description.getText().toString());
-                    e.setOrg(organizer.getText().toString());
-                    e.setLocation(location.getText().toString());
                     GeordieFirebaseMethods.saveEventModalToFirestore(e);
                 }
 
-                Intent intent = new Intent(FirebaseTester.this, MainActivity.class);
-                FirebaseTester.this.startActivity(intent);
+                Intent intent = new Intent(EditCreateEvent.this, MainActivity.class);
+                EditCreateEvent.this.startActivity(intent);
             }
             else {
-                Toast.makeText(FirebaseTester.this, "EventIsInvalid", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditCreateEvent.this, "EventIsInvalid", Toast.LENGTH_SHORT).show();
             }
             // Read from the database
         }
@@ -110,7 +100,6 @@ public class FirebaseTester extends AppCompatActivity {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("test");
 
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
     }
 
@@ -164,7 +153,7 @@ public class FirebaseTester extends AppCompatActivity {
         final LocalTime t = LocalTime.now();
         final int mHour = t.getHour();
         final int mMinute = t.getMinute();
-        TimePickerDialog timePickerDialog = new TimePickerDialog(FirebaseTester.this,
+        TimePickerDialog timePickerDialog = new TimePickerDialog(EditCreateEvent.this,
                 new TimePickerDialog.OnTimeSetListener(){
 
                     @Override
@@ -178,7 +167,7 @@ public class FirebaseTester extends AppCompatActivity {
         );
 
         // Date picker dialog
-        DatePickerDialog datePickerDialog = new DatePickerDialog(FirebaseTester.this,
+        DatePickerDialog datePickerDialog = new DatePickerDialog(EditCreateEvent.this,
                 new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {

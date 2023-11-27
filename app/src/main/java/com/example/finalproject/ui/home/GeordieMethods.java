@@ -7,6 +7,7 @@ import java.time.LocalTime;
 
 public class GeordieMethods {
     public static String timeTostring(LocalTime time) {
+
         boolean am = true;
         int hour = time.getHour();
         if (hour > 12) {

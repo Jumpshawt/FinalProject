@@ -5,8 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
 
-import com.example.finalproject.ui.login.WelcomeScreen;
-import com.google.android.material.snackbar.Snackbar;
+import com.example.finalproject.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.navigation.NavController;
@@ -16,7 +15,8 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.finalproject.databinding.ActivityMainBinding;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,8 +37,23 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(MainActivity.this, FirebaseTester.class);
-                startActivity(i);
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(1000);
+                            Intent i = new Intent(MainActivity.this, EditCreateEvent.class);
+                            startActivity(i);
+                        }
+                        catch (InterruptedException e){
+                            throw new RuntimeException(e);
+                        }
+                    }
+                };
+                ExecutorService executor = Executors.newFixedThreadPool(1);
+
+                executor.submit(runnable);
+                executor.shutdown();
             }
 
         });

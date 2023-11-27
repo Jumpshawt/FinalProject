@@ -10,8 +10,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.finalproject.FirebaseTester;
-import com.example.finalproject.MainActivity;
+import com.example.finalproject.EditCreateEvent;
 import com.example.finalproject.R;
 import com.example.finalproject.ui.GeordieFirebaseMethods;
 
@@ -51,10 +50,11 @@ public class EventInfoScreen extends AppCompatActivity {
         {
             GeordieFirebaseMethods.removeEventModalFromFirestore(id);
             finish();
+
         });
         edit.setOnClickListener(v ->
         {
-            Intent intent = new Intent(EventInfoScreen.this, FirebaseTester.class);
+            Intent intent = new Intent(EventInfoScreen.this, EditCreateEvent.class);
             intent.putExtra("object",(Parcelable)eventInfo);
             EventInfoScreen.this.startActivity(intent);
         });
